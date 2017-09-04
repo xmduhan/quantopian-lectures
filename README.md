@@ -1,1 +1,0 @@
-# quantopian-lectures
