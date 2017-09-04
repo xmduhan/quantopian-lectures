@@ -1,0 +1,25 @@
+* 均值(mean)
+** 算数平均值(arithmetic mean)
+   #+BEGIN_SRC python :results output
+   import numpy as np
+
+   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+   x2 = x1 + [100]
+
+   print 'Mean of x1:', sum(x1), '/', len(x1), '=', np.mean(x1)
+   print 'Mean of x2:', sum(x2), '/', len(x2), '=', np.mean(x2)
+   #+END_SRC
+
+   #+RESULTS:
+   : Mean of x1: 29 / 8 = 3.625
+   : Mean of x2: 129 / 9 = 14.3333333333
+   
+** 中位數(median)
+** 众数(mode)
+** 几何平均数(geometric mean)
+   #+BEGIN_SRC python
+   import scipy.stats as stats
+   stats.
+   
+   #+END_SRC
+** 调和平均数(harmonic mean)
