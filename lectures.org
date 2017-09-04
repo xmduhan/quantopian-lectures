@@ -15,11 +15,42 @@
    : Mean of x2: 129 / 9 = 14.3333333333
    
 ** 中位數(median)
+   #+BEGIN_SRC python :results output :exports both
+   import numpy as np
+
+   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+   x2 = x1 + [100]
+
+   print 'Median of x1:', np.median(x1)
+   print 'Median of x2:', np.median(x2)
+   #+END_SRC
+
+   #+RESULTS:
+   : Median of x1: 3.5
+   : Median of x2: 4.0
+
 ** 众数(mode)
+   #+BEGIN_SRC python :results output exports both
+   
+   #+END_SRC
 ** 几何平均数(geometric mean)
    #+BEGIN_SRC python
    import scipy.stats as stats
    stats.
    
    #+END_SRC
+   #+BEGIN_SRC python :results output :exports both
+   import scipy.stats as stats
+
+   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+   x2 = x1 + [100]
+
+   print 'Geometric mean of x1:', stats.gmean(x1)
+   print 'Geometric mean of x2:', stats.gmean(x2)
+   #+END_SRC
+
+   #+RESULTS:
+   : Geometric mean of x1: 3.09410402498
+   : Geometric mean of x2: 4.55253458762
+
 ** 调和平均数(harmonic mean)
