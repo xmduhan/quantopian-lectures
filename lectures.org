@@ -30,7 +30,7 @@
    : Median of x2: 4.0
 
 ** 众数(mode)
-   #+BEGIN_SRC python :results output exports both
+   #+BEGIN_SRC python :results output :exports both
    def mode(array):
        most = max(list(map(array.count, array)))
        return list(set(filter(lambda x: array.count(x) == most, array)))
