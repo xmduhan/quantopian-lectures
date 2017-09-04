@@ -43,13 +43,13 @@
 
 ** 几何平均数(geometric mean)
    #+BEGIN_SRC python :results output :exports both
-   import scipy.stats as stats
+     import scipy.stats as stats
 
-   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
-   x2 = x1 + [100]
+     x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+     x2 = x1 + [100]
 
-   print 'Geometric mean of x1:', stats.gmean(x1)
-   print 'Geometric mean of x2:', stats.gmean(x2)
+     print 'Geometric mean of x1:', stats.gmean(x1)
+     print 'Geometric mean of x2:', stats.gmean(x2)
    #+END_SRC
 
    #+RESULTS:
