@@ -1,6 +1,6 @@
 * 均值(mean)
 ** 算数平均值(arithmetic mean)
-   #+BEGIN_SRC python :results output
+   #+BEGIN_SRC python :results output :exports both
    import numpy as np
 
    x1 = [1, 2, 2, 3, 4, 5, 5, 7]
