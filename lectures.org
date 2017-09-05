@@ -1,13 +1,13 @@
 * 均值(mean)
 ** 算数平均值(arithmetic mean)
    #+BEGIN_SRC python :results output :exports both
-   import numpy as np
+     import numpy as np
 
-   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
-   x2 = x1 + [100]
+     x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+     x2 = x1 + [100]
 
-   print 'Mean of x1:', sum(x1), '/', len(x1), '=', np.mean(x1)
-   print 'Mean of x2:', sum(x2), '/', len(x2), '=', np.mean(x2)
+     print 'Mean of x1:', sum(x1), '/', len(x1), '=', np.mean(x1)
+     print 'Mean of x2:', sum(x2), '/', len(x2), '=', np.mean(x2)
    #+END_SRC
 
    #+RESULTS:
@@ -16,13 +16,13 @@
    
 ** 中位數(median)
    #+BEGIN_SRC python :results output :exports both
-   import numpy as np
+     import numpy as np
 
-   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
-   x2 = x1 + [100]
+     x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+     x2 = x1 + [100]
 
-   print 'Median of x1:', np.median(x1)
-   print 'Median of x2:', np.median(x2)
+     print 'Median of x1:', np.median(x1)
+     print 'Median of x2:', np.median(x2)
    #+END_SRC
 
    #+RESULTS:
@@ -31,11 +31,11 @@
 
 ** 众数(mode)
    #+BEGIN_SRC python :results output :exports both
-   def mode(array):
-       most = max(list(map(array.count, array)))
-       return list(set(filter(lambda x: array.count(x) == most, array)))
-   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
-   print mode(x1)
+     def mode(array):
+         most = max(list(map(array.count, array)))
+         return list(set(filter(lambda x: array.count(x) == most, array)))
+     x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+     print mode(x1)
    #+END_SRC
 
    #+RESULTS:
@@ -58,15 +58,19 @@
 
 ** 调和平均数(harmonic mean)
    #+BEGIN_SRC python :results output :exports both
-   import scipy.stats as stats
-   
-   x1 = [1, 2, 2, 3, 4, 5, 5, 7]
-   x2 = x1 + [100]
+     import scipy.stats as stats
 
-   print 'Harmonic mean of x1:', stats.hmean(x1)
-   print 'Harmonic mean of x2:', stats.hmean(x2)
+     x1 = [1, 2, 2, 3, 4, 5, 5, 7]
+     x2 = x1 + [100]
+
+     print 'Harmonic mean of x1:', stats.hmean(x1)
+     print 'Harmonic mean of x2:', stats.hmean(x2)
    #+END_SRC
 
    #+RESULTS:
    : Harmonic mean of x1: 2.55902513328
    : Harmonic mean of x2: 2.86972365624
+
+* 方差(variance)
+** 
+
