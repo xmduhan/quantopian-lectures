@@ -154,10 +154,67 @@
 
 
 #+end_example
+*** 变量相关建模
+    - 但在实际情况中输入的变量不可能是完全线性无关的, 直接建模效果就下降很多了:
+      #+BEGIN_SRC python :results output :exports both
+        # coding: utf-8
+        from pandas import Series
+        from pandas import DataFrame
+        from random import gauss
+        from statsmodels import regression
 
-    
+        # 构造数据
+        s = Series(range(1000))
+        x1 = s.apply(lambda x: 1).cumsum()   # 相关
+        x2 = s.apply(lambda x: gauss(1, 1)).cumsum()
+        x3 = s.apply(lambda x: gauss(1, 1)).cumsum()
+        x4 = s.apply(lambda x: gauss(1, 1)).cumsum()
+        x5 = s.apply(lambda x: .5).cumsum()  # 相关
+        Y = x1 + x3 * 2 + 5
 
-  
+        # 建模拟合
+        X = DataFrame({'x1': x1, 'x2': x2, 'x3': x3, 'x4': x4, 'x5': x5})
+        X['a'] = 1
+        model = regression.linear_model.OLS(Y, X).fit()
+        print list(model.params.round(3))
+      #+END_SRC
 
+      #+RESULTS:
+      : [0.80000000000000004, -0.0, 2.0, -0.0, 0.40000000000000002, 5.0]
 
+    - 这就要进行模型的迭代选择, 文中提到可以用aic/bic来优化, 但实际优化效果非常差
+    - 这些计算值非常不稳定, 就连调整字段顺序都会导致值变异
+      #+BEGIN_SRC python :results output :exports both
+        from pandas import Series
+        from pandas import DataFrame
+        from random import gauss
+        from random import sample
+        from statsmodels import regression
+        from numpy import inf
 
+        s = Series(range(1000))
+        x1 = s.apply(lambda x: 1 + gauss(1, 1)).cumsum()
+        x2 = s.apply(lambda x: gauss(1, 1)).cumsum()
+        x3 = s.apply(lambda x: gauss(1, 1)).cumsum()
+        x4 = s.apply(lambda x: gauss(1, 1)).cumsum()
+        x5 = s.apply(lambda x: .5 + gauss(1, 1)).cumsum()
+        Y = x1 + x3 * 2 + 5
+        X = DataFrame({'x1': x1, 'x2': x2, 'x3': x3, 'x4': x4, 'x5': x5})
+
+        def getRank(X):
+            X['a'] = 1
+            model = regression.linear_model.OLS(Y, X).fit()
+            return  model.aic
+
+        X1 = X[['x1', 'x3']].copy()
+        print getRank(X1)
+
+        X1 = X[['x3', 'x1']].copy()
+        print getRank(X1)
+
+      #+END_SRC
+
+      #+RESULTS:
+      : -47615.9669419
+      : -48448.1759039
+      
