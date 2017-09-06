@@ -89,13 +89,12 @@
 **** R-squared
      - 表示目标值的变化由模型解释的精确程度
        - the R2 value tells us the fraction of the total variation of  YY  that is explained by the model
+     - 值为[0, 1], 越大越好
 **** Adj. R-squared
      - 同R-squared
 **** F-statistic: 联合假设检验(joint hypotheses test)
-     - 此外也称方差比率检验、方差齐性检验
-     - 用来分析用了超过一个参数的统计模型，以判断该模型中的全部或一部分参数是否适合用来估计母体
      - 确定从样本(sample)统计结果推论至总体时所犯错的概率
-     - 
+     - 此外也称方差比率检验、方差齐性检验
 
 **** Log-Likelihood
 **** AIC: 赤池信息量(akaike information criterion)
@@ -103,5 +102,40 @@
 **** BIC: 贝叶斯信息量(bayesian information criterion)
      - 类似AIC
 *** 残差分析
+**** Omnibus
+**** Skew: 偏度
+**** Kurtosis: 峰度
 **** 杜宾-瓦特森统计量(Durbin-Watson statistic) [[[https://zh.wikipedia.org/wiki/%25E6%259D%259C%25E5%25AE%25BE-%25E7%2593%25A6%25E7%2589%25B9%25E6%25A3%25AE%25E7%25BB%259F%25E8%25AE%25A1%25E9%2587%258F][参考]]]
      - 用来检测回归分析中的残差项是否存在自相关
+     - 数值如果接近2没有自相关性
+**** Jarque-Bera
+**** Cond. No.
+*** 变量无相关建模
+    #+BEGIN_SRC ipython :session :results output :exports both
+      from pandas import Series
+      from pandas import DataFrame
+      from random import gauss
+      from statsmodels import regression
+      # 构造数据
+      s = Series(range(1000))
+      x1 = s.apply(lambda x: gauss(1, 1)).cumsum()
+      x2 = s.apply(lambda x: gauss(1, 1)).cumsum()
+      x3 = s.apply(lambda x: gauss(1, 1)).cumsum()
+      x4 = s.apply(lambda x: gauss(1, 1)).cumsum()
+      x5 = s.apply(lambda x: gauss(1, 1)).cumsum()
+      Y = x1 + x3 * 2 + 5
+      # 模型拟合
+      X = DataFrame({'x1': x1, 'x2': x2, 'x3': x3, 'x4': x4, 'x5': x5})
+      X['a'] = 1
+      model = regression.linear_model.OLS(Y, X).fit()
+      print list(model.params.round(3))
+    #+END_SRC
+
+    #+RESULTS:
+    : [1.0, -0.0, 2.0, -0.0, -0.0, 5.0]
+    
+
+  
+
+
+
