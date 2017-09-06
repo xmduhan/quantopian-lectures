@@ -111,6 +111,7 @@
 **** Jarque-Bera
 **** Cond. No.
 *** 变量无相关建模
+    - 在输入变量相互不相关的情况下, 多元线性回归可以很精确的拟合出模型
     #+BEGIN_SRC python :results output :exports both
       # coding: utf-8
       from pandas import Series
@@ -133,9 +134,7 @@
     #+END_SRC
 
     #+RESULTS:
-    : [1.0, 0.0, 2.0, 0.0, 0.0, 5.0]
-
-
+    : [1.0, 0.0, 2.0, 0.0, -0.0, 5.0]
 
 
 
