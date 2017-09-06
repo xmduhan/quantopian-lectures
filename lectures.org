@@ -84,14 +84,24 @@
      - The errors are normally distributed. If this does not hold, we cannot use some of the statistics, such as the F-test
    - 对于多元线性回归, 各变量相互是独立的 
      - There is no exact linear relationship between the independent variables. Otherwise, it is impossible to solve for the coefficients  βi  uniquely, since the same linear equation can be expressed in multiple ways.
-** 多元线性回归
-*** 杜宾-瓦特森统计量(Durbin-Watson statistic) [[[https://zh.wikipedia.org/wiki/%25E6%259D%259C%25E5%25AE%25BE-%25E7%2593%25A6%25E7%2589%25B9%25E6%25A3%25AE%25E7%25BB%259F%25E8%25AE%25A1%25E9%2587%258F][参考]]]
-    - 用来检测回归分析中的残差项是否存在自相关
-    -  
-*** F-statistic: 联合假设检验(joint hypotheses test)
-    - 此外也称方差比率检验、方差齐性检验
-    - 用来分析用了超过一个参数的统计模型，以判断该模型中的全部或一部分参数是否适合用来估计母体
-*** R-squared
-*** AIC: 赤池信息量(akaike information criterion)
-*** BIC: 贝叶斯信息量(bayesian information criterion)
+** 结果分析
+*** 模型基本信息 
+**** R-squared
+     - 表示目标值的变化由模型解释的精确程度
+       - the R2 value tells us the fraction of the total variation of  YY  that is explained by the model
+**** Adj. R-squared
+     - 同R-squared
+**** F-statistic: 联合假设检验(joint hypotheses test)
+     - 此外也称方差比率检验、方差齐性检验
+     - 用来分析用了超过一个参数的统计模型，以判断该模型中的全部或一部分参数是否适合用来估计母体
+     - 确定从样本(sample)统计结果推论至总体时所犯错的概率
+     - 
 
+**** Log-Likelihood
+**** AIC: 赤池信息量(akaike information criterion)
+     - 用于判断拟合优度的统计参数, 值越小越好 
+**** BIC: 贝叶斯信息量(bayesian information criterion)
+     - 类似AIC
+*** 残差分析
+**** 杜宾-瓦特森统计量(Durbin-Watson statistic) [[[https://zh.wikipedia.org/wiki/%25E6%259D%259C%25E5%25AE%25BE-%25E7%2593%25A6%25E7%2589%25B9%25E6%25A3%25AE%25E7%25BB%259F%25E8%25AE%25A1%25E9%2587%258F][参考]]]
+     - 用来检测回归分析中的残差项是否存在自相关
