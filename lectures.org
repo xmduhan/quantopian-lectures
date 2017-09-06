@@ -111,7 +111,8 @@
 **** Jarque-Bera
 **** Cond. No.
 *** 变量无相关建模
-    #+BEGIN_SRC ipython :session :results output :exports both
+    #+BEGIN_SRC python :results output :exports both
+      # coding: utf-8
       from pandas import Series
       from pandas import DataFrame
       from random import gauss
@@ -132,7 +133,29 @@
     #+END_SRC
 
     #+RESULTS:
-    : [1.0, -0.0, 2.0, -0.0, -0.0, 5.0]
+    : [1.0, 0.0, 2.0, 0.0, 0.0, 5.0]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [1.0, -0.0, 2.0, 0.0, -0.0, 5.0]
+
+
+#+end_example
+
     
 
   
