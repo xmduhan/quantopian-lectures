@@ -217,4 +217,56 @@
       #+RESULTS:
       : -47615.9669419
       : -48448.1759039
-      
+* 数据的分布
+** 构造数据
+*** 正态分布
+    #+BEGIN_SRC python :results output :exports both
+      from random import gauss
+      from pandas import Series
+      s = Series(range(100000)).apply(lambda x: gauss(0, 1))
+      print 'mean:', s.mean()
+      print 'std:',s.std()
+    #+END_SRC
+
+    #+RESULTS:
+    : mean: 0.00336702683042
+    : std: 0.996469551496
+*** 泊松分布
+    #+BEGIN_SRC python :results output :exports both
+      import numpy as np
+      from pandas import Series
+      poisson = Series(np.random.poisson(size=10000))
+      print poisson.value_counts()
+    #+END_SRC
+
+    #+RESULTS:
+    : 1    3704
+    : 0    3674
+    : 2    1812
+    : 3     606
+    : 4     167
+    : 5      33
+    : 6       3
+    : 7       1
+    : dtype: int64
+** Skewness: 偏度
+** Kurtosis: 峰度
+** Jarque-Bera: JB检验
+   #+BEGIN_SRC python :results output :exports both
+     # coding: utf-8
+     from random import gauss
+     from pandas import Series
+     from statsmodels.stats.stattools import jarque_bera
+     s = Series(range(100000)).apply(lambda x: gauss(0, 1))
+     _, pvalue, _, _ = jarque_bera(s)
+     print u'pvalue:', pvalue
+     if pvalue > 0.05:
+         print u'正态分布'
+     else:
+         print u'[不是]正态分布'
+   #+END_SRC
+
+   #+RESULTS:
+   : pvalue: 0.924586394739
+   : 正态分布
+
