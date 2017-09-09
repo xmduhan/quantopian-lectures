@@ -134,26 +134,8 @@
     #+END_SRC
 
     #+RESULTS:
-    : [1.0, 0.0, 2.0, 0.0, -0.0, 5.0]
+    : [1.0, -0.0, 2.0, 0.0, 0.0, 5.0]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    [1.0, -0.0, 2.0, 0.0, -0.0, 5.0]
-
-
-#+end_example
 *** 变量相关建模
     - 但在实际情况中输入的变量不可能是完全线性无关的, 直接建模效果就下降很多了:
       #+BEGIN_SRC python :results output :exports both
@@ -220,6 +202,7 @@
 * 数据的分布
 ** 构造数据
 *** 正态分布
+    - 生成正态分布序列
     #+BEGIN_SRC python :results output :exports both
       from random import gauss
       from pandas import Series
@@ -231,6 +214,27 @@
     #+RESULTS:
     : mean: 0.00336702683042
     : std: 0.996469551496
+    
+    - 刻画正态分布曲线
+    #+BEGIN_SRC python :results outout :exports both 
+      import numpy as np
+      mu_1 = 0
+      mu_2 = 0
+      sigma_1 = 1
+      sigma_2 = 2
+      x = np.linspace(-8, 8, 200)
+      y = (1/(sigma_1 * np.sqrt(2 * 3.14159))) * np.exp(-(x - mu_1)*(x - mu_1) / (2 * sigma_1 * sigma_1))
+      z = (1/(sigma_2 * np.sqrt(2 * 3.14159))) * np.exp(-(x - mu_2)*(x - mu_2) / (2 * sigma_2 * sigma_2))
+      plt.plot(x, y, x, z)
+      plt.xlabel('Value')
+      plt.ylabel('Probability')
+      plt.show()
+    #+END_SRC
+
+    #+RESULTS:
+    
+    - 正态分布的3个重要阈值: 68%(1倍), 95%(2倍), 99%(3倍)
+
 *** 泊松分布
     #+BEGIN_SRC python :results output :exports both
       import numpy as np
@@ -249,6 +253,30 @@
     : 6       3
     : 7       1
     : dtype: int64
+*** 二项式分布
+    - 是离散正态分布
+      #+BEGIN_SRC python :results output :exports both
+        import numpy as np
+        print np.random.binomial(1, 0.5, 10)
+        print np.random.binomial(10, 0.5, 10)
+      #+END_SRC
+
+*** 伯努利分布
+    - 伯努利分布是二项分布在n = 1时的特殊情况
+    - 只有两种结果的离散概率, 类似抛硬币
+
+*** 指数分布(Exponential Distribution)
+    #+BEGIN_SRC python :results output :exports both
+      import numpy as np
+      import matplotlib.pyplot as plt
+      X = np.random.exponential(5, 1000)
+      x = range(0, 80)
+      plt.hist(X, bins=x, normed='true')
+      plt.show()
+    #+END_SRC
+
+    #+RESULTS:
+
 ** Skewness: 偏度
 ** Kurtosis: 峰度
 ** Jarque-Bera: JB检验
@@ -269,4 +297,257 @@
    #+RESULTS:
    : pvalue: 0.924586394739
    : 正态分布
+* 残差(residuals)
+  #+BEGIN_SRC python :results output :exports both
+    # %matplotlib inline
+    from random import gauss
+    from pandas import Series
+    from pandas import DataFrame
+    from statsmodels.regression import linear_model
+    from statsmodels.stats.stattools import jarque_bera
 
+    s = Series(range(1000))
+    x = s.apply(lambda x: .1).cumsum()
+    noise = s.apply(lambda x: gauss(0, 1))
+    X = DataFrame({'x': x})
+    Y = x + 5 + noise
+    X['a'] = 1
+    model = linear_model.OLS(Y, X).fit()
+    # 有效的线性拟合, 残差的均值应该为0
+    print u'残差均值:', model.resid.mean()
+    # 残差应该呈现正态分布(pvalue > .05)
+    _, pvalue, _, _ = jarque_bera(model.resid)
+    print 'pvalue:', pvalue
+    # 另外残差不能有趋势, 需要查看残差图
+    # Y_ = model.params[0] * x + model.params[1]
+    # df = DataFrame({'Y_': Y_, 'Y': Y})
+    # df.plot()
+    # --------------------------
+    # residuals = model.resid
+    # plt.scatter(x, Y, alpha=1)
+    # plt.plot(x, model.predict(), color='red')
+    # plt.errorbar(x, Y, xerr=0, yerr=[residuals, 0*residuals] ,linestyle="None", color='green')
+  #+END_SRC
+
+  #+RESULTS:
+  : mean: -4.82991424633e-15
+  : std: 0.421156549288
+  : pvalue: 0.421156549288
+** 非线性
+   - 如果参数有明显的趋势性, 可以检测出自相关关系
+   - 说明数据的关系可能不是线性的
+
+** 异方差(Heteroscedasticity)
+  - 线性拟合的一个基本假设是数据的方差是恒定的
+*** 异方差检测(Breusch-Pagan)
+    #+BEGIN_SRC python :results output :exports both
+      # coding: utf-8
+      # %matplotlib inline
+      from random import gauss
+      from pandas import Series
+      from pandas import DataFrame
+      from statsmodels.regression import linear_model
+      from statsmodels.stats.stattools import jarque_bera
+      import statsmodels.stats.diagnostic as smd
+
+      s = Series(range(100))
+      x = s.apply(lambda x: .1).cumsum()
+      noise = s.apply(lambda x: gauss(0, 1))
+      X = DataFrame({'x': x})
+      Y = x + 5 + noise * x
+      X['a'] = 1
+      model = linear_model.OLS(Y, X).fit()
+      _, pvalue, _, _ = jarque_bera(model.resid)
+      print 'JB pvalue:', pvalue
+      # Y_ = model.params[0] * x + model.params[1]
+      # df = DataFrame({'Y_': Y_, 'Y': Y})
+      # df.plot()
+
+      # 其中 model.model.exog 是模型输入的原始数据
+      pvalue = smd.het_breushpagan(model.resid, model.model.exog)[1]
+      print 'Breusch-Pagan pvalue:', pvalue
+      if pvalue > 0.05:
+          print u'方差稳定'
+      if pvalue < 0.05:
+          print u'异方差'
+    #+END_SRC
+
+    #+RESULTS:
+    : JB pvalue: 2.20521779088e-05
+    : Breusch-Pagan pvalue: 2.93253173812e-05
+    : 异方差
+*** 方差调整方法
+    - 构造一个新序列Y_*
+    - 对X和Y_*进行线性回归分析
+    - Y_*还原Y的预测值
+**** differences analysis
+     Y_diff = Y.diff()
+**** log transformations
+     Y_log = np.log(Y)
+**** Box-Cox transformations
+     import scipy.stats as stats
+     Y_boxcox = stats.boxcox(Y)[0]
+**** 使用GARCH(条件异方差模型)进行建模
+** 残差的自相关(Autocorrelation) 
+*** 自相关性的检测
+    #+BEGIN_SRC python :results output :exports both
+      # coding: utf-8
+      import numpy as np
+      from pandas import DataFrame
+      import statsmodels.api as sm
+      import statsmodels.stats.diagnostic as smd
+
+      n = 1000
+      x = np.random.randint(0, 100, n)
+      noise = np.random.normal(0, 1, n)
+      Y = 100 + 2 * x + noise
+      Y = Y.cumsum()
+      X = DataFrame({'x': x})
+      X['a'] = 1
+      model = sm.OLS(Y, X).fit()
+      # p-values < .05: 存在自相关性
+      print smd.acorr_ljungbox(model.resid, lags=20)[1]
+    #+END_SRC
+
+    #+RESULTS:
+    : [  9.65298464e-219   0.00000000e+000   0.00000000e+000   0.00000000e+000
+    :    0.00000000e+000   0.00000000e+000   0.00000000e+000   0.00000000e+000
+    :    0.00000000e+000   0.00000000e+000   0.00000000e+000   0.00000000e+000
+    :    0.00000000e+000   0.00000000e+000   0.00000000e+000   0.00000000e+000
+    :    0.00000000e+000   0.00000000e+000   0.00000000e+000   0.00000000e+000]
+*** 处理自相关序列
+    - 处理自相关序列的方法类似处理异方差
+    - 自相关性检查例子中其自相关性是由: Y = Y.cumsum()引入的, 使用Y = Y.diff()确实可以直接消除, 这里就牵扯到一个不同阶的序列的线性回归问题
+* 随机变量
+  - 金融分析有确定性模型和随机模型之分, 大量的资产价格变化是无法用确定性模型来分析的, 这时随机模型就派上用场了.
+  - 随机变量是服从对应的概率分布的.
+
+** 随机变量的分类
+*** 离散型随机变量
+*** 连续性随机变量
+** PMF: 概率质量函数(probability mass function)
+   - p(x) = P(X=x)
+   - 用于描述连续性随机变量
+** PDF: 概率密度函数(probability density function)
+   - 用于描述处理离散性随机变量
+*** 基于PDF的模型
+**** 布莱克-舒尔斯模型(Black-Scholes Model)
+     - 由此模型可以推导出布莱克-舒尔斯公式，并由此公式估算出欧式期权的理论价, 此公式问世后带来了期权市场的繁荣.
+**** 资本资产定价模型(Capital Asset Pricing Model)
+**** 蒙地卡羅方法(Monte Carlo method)
+** CDF: 累积分布函数(cumulative distribution function)
+   - f(x) = P(X <= x) 
+* 多重比较偏差(Multiple comparisons bias)
+  - 多重比较谬误（Multiple Comparisons Fallacy），是一种概率谬误，系指广泛比较二个不同群体的所有差异，从中找出具有差异的特征，然后宣称它就是造成二个群体不同的原因。
+  - 1992年瑞典有个研究试图找出电源线对健康的影响，他们收集了高压电源线300米范围内所有住户的样本长达25年，
+  - 对超过800种疾病一一检查发生率的统计差异。他们发现幼年白血病的发病率是一般人的4倍，还推动政府为此采取行动。
+  - 然而，当我们比对超过800种疾病时，有一种以上的疾病因为随机效应而呈现发病率增加是非常可能的。
+  - 果不其然，后续的研究再也没有发现电源线和幼年白血病的相关及因果关系。
+** 在无相关性的数据中检测出相关性
+  #+BEGIN_SRC python :results output :exports both
+    # coding: utf-8
+    from __future__ import division
+    import numpy as np
+    import pandas as pd
+    import scipy.stats as stats
+    import matplotlib.pyplot as plt
+
+    df = pd.DataFrame()
+
+    N = 20
+    T = 1000
+
+    for i in range(N):
+        X = np.random.normal(0, 1, T)
+        X = pd.Series(X)
+        name = 'X%s' % i
+        df[name] = X
+
+    cutoff = 0.05
+
+    significant_pairs = []
+
+    for i in range(N):
+        for j in range(i+1, N):
+            Xi = df.iloc[:, i]
+            Xj = df.iloc[:, j]
+            results = stats.spearmanr(Xi, Xj)
+            pvalue = results[1]
+            if pvalue < cutoff:
+                significant_pairs.append((i, j))
+    # 存在价差出相关的数据
+    print significant_pairs
+    # 这些数据除以总样本数刚好接近置信区间(5%)
+    print len(significant_pairs) / (N * (N-1) / 2)
+  #+END_SRC
+
+  #+RESULTS:
+  : [(0, 3), (0, 6), (0, 8), (0, 12), (0, 14), (1, 11), (1, 18), (3, 12), (4, 18), (7, 9), (9, 14), (10, 15), (14, 16)]
+  : 0.0684210526316
+** 邦费罗尼校正(Bon Ferroni Correction)
+   #+BEGIN_SRC python :results output :exports both
+     # coding: utf-8
+     # 原始置信区间
+     desired_level = 0.05
+     # 测试次数
+     num_tests = 200
+     # 计算调整后的置信区间
+     new_cutoff = desired_level / num_tests
+     print u'调整后的置信区间:', new_cutoff
+   #+END_SRC
+
+   #+RESULTS:
+   : 调整后的置信区间: 0.00025
+
+** 大数据量解决多重比较问题
+   - 大数据量分析时帮费罗尼校验会变得格外严格, 导致过滤掉真是存在的统计关系
+   - 可以通过两步实验解决这个问题
+   - 1. 先在较大范围进行测试, 获得较少的疑似变量, 作为候选变量
+   - 2. 通过不同数据段重新测试候选变量
+* MLEs: 最大似然估计(Maximum Likelihood Estimates)
+  - 从目前的理解来说, 最大似然法实际就是对一个概率分布参数的估计
+** 正态分布
+   #+BEGIN_SRC python :results output :exports both
+     # coding: utf-8
+     import numpy as np
+     import matplotlib.pyplot as plt
+     from scipy import stats
+
+     # 构造数据
+     X = np.random.normal(40, 10, 10000)
+
+     # 进行似然估计
+     mu, std = stats.norm.fit(X)
+
+     # 刻画概率分布函数
+     pdf = stats.norm.pdf
+     x = np.linspace(0, 80, 80)
+     y = pdf(x, loc=mu, scale=std)
+
+     plt.hist(X, bins=x, normed='true')
+     plt.plot(y)
+     plt.show()
+
+   #+END_SRC
+
+   #+RESULTS:
+
+** 指数分布
+   #+BEGIN_SRC python :results output :exports both
+     import numpy as np
+     import matplotlib.pyplot as plt
+     from scipy import stats
+
+     X = np.random.exponential(5, 1000)
+     pdf = stats.expon.pdf
+     l = stats.expon.fit(X)[1]
+     x = range(0, 80)
+     y = pdf(x, scale=l)
+     plt.hist(X, bins=x, normed='true')
+     plt.plot(y)
+     plt.show()
+   #+END_SRC
+
+   #+RESULTS:
+  
+* 
