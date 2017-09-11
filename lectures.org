@@ -277,6 +277,7 @@
 
     #+RESULTS:
 
+*** 肥尾分布(fat-tailed distributions)
 ** Skewness: 偏度
 ** Kurtosis: 峰度
 ** Jarque-Bera: JB检验
@@ -550,4 +551,81 @@
 
    #+RESULTS:
   
-* 
+* 斯皮尔曼等级相关系数(Spearman rank correlation) 
+** 单调相关性
+   - 相对于"线性相关性", 例如: y=e^x, 是相关的, 但非线性.
+   #+BEGIN_SRC python :results output :exports both
+     # coding: utf-8
+     import scipy.stats as stats
+     l = [10, 9, 5, 7, 5]
+     print 'Raw data: ', l
+     # average 表示如果出现相同的数据, 如:5, 则其排名为1或2, 取平均值就是1.5
+     # 除了average还有min, max, dense, ordinal等评分方法
+     print 'Ranking: ', list(stats.rankdata(l, method='average'))
+   #+END_SRC
+
+   #+RESULTS:
+   : Raw data:  [10, 9, 5, 7, 5]
+   : Ranking:  [5.0, 4.0, 1.5, 3.0, 1.5]
+** 具体使用
+   - 返回值[-1, 1], 正数代表正相关性, 负数代表负相关性, 0表示没有单调相关, 而非不相关.
+   - 在噪声比较小的情况, spearman会明显优于相关性检测, 但是如果噪声较大spearman效果会明显衰减
+   - 算法
+      #+BEGIN_SRC python :results output :exports both 
+        # coding: utf-8
+        from __future__ import division
+        import numpy as np
+        import scipy.stats as stats
+        import matplotlib.pyplot as plt
+        import math
+
+        n = 1000
+        X = np.random.poisson(size=n)
+        noise = np.random.normal(0, 1)
+        Y = np.exp(X) + noise
+
+        # 普通相关系数
+        print 'corrcoef:', np.corrcoef(X, Y)[0,1]
+
+        # spearman rank correlation
+        Xrank = stats.rankdata(X, method='average')
+        Yrank = stats.rankdata(Y, method='average')
+        diffs = Xrank - Yrank # order doesn't matter since we'll be squaring these values
+        spearman = 1 - 6 * sum(diffs * diffs) / (n * (n ** 2 - 1))
+        print 'spearman:', spearman
+      #+END_SRC
+
+      #+RESULTS:
+      : corrcoef: 0.404886695916
+      : spearman: 1.0
+   - 内置函数
+      #+BEGIN_SRC python :results output :exports both
+      # coding: utf-8
+      from __future__ import division
+      import numpy as np
+      import scipy.stats as stats
+      import matplotlib.pyplot as plt
+      import math
+
+      n = 1000
+      X = np.random.poisson(size=n)
+      noise = np.random.normal(0, 1)
+      Y = np.exp(X) + noise
+
+      # 普通相关系数
+      print 'corrcoef:', np.corrcoef(X, Y)[0,1]
+      print 'spearmanr:', stats.spearmanr(X, Y)[0] 
+
+      #+END_SRC
+
+      #+RESULTS:
+      : corrcoef: 0.523851287117
+      : spearmanr: 1.0
+   
+* Beta对冲(Beta Hedging)
+** 市场中性(Market Neutral)
+   - 如果一个策略对于市场暴露的Beta是常数0, 我们称其为市场中性.
+** 其他对冲方法
+*** 配对交易(Pairs Trading)
+*** 多/空仓策略(Long/Short Equity)
+
