@@ -623,9 +623,135 @@
       : spearmanr: 1.0
    
 * Beta对冲(Beta Hedging)
+  - beta对冲的最大问题是如何才能正确的获得alpha和beta, 通过简单的线性拟合的到的参数根本不稳定
 ** 市场中性(Market Neutral)
    - 如果一个策略对于市场暴露的Beta是常数0, 我们称其为市场中性.
 ** 其他对冲方法
 *** 配对交易(Pairs Trading)
 *** 多/空仓策略(Long/Short Equity)
+* 杠杆(Leverage)
+* 协整(cointegration)
+** 平稳性(stationarity)
+   - 通常时间序列中, 在没有经过检验的情况下, 假设数据是平稳的.
+   - 平稳性通可以朴素的理解为序列和时间刻度无关
+     #+BEGIN_SRC python :results output :exports both
+       # %matplotlib inline
+       import numpy as np
+       import pandas as pd
+       s = pd.Series(range(100))
+       a = s.apply(lambda x: np.random.normal(0, 1))
+       b = s.apply(lambda x: np.random.normal(0, 1) + x * .1)
+       data = pd.DataFrame({'a': a, 'b': b})
+       data.plot()
+     #+END_SRC
 
+     #+RESULTS:
+   - 非平稳序列导致一些统计值失效, 如均值
+*** 平稳性检测
+    - adfuller(Augmented Dickey-Fuller) 是一单位根检验    
+    #+BEGIN_SRC python :results output :exports both
+      # coding: utf-8
+      import numpy as np
+      import pandas as pd
+      from statsmodels.tsa.stattools import adfuller
+      s = pd.Series(range(1000))
+      # 稳定序列
+      a = s.apply(lambda x: np.random.normal(0, 1))
+      pvalue = adfuller(a)[1]
+      print 'a稳定:', pvalue < .01
+      # 非稳定序列
+      b = s.apply(lambda x: np.random.normal(0, 1) + x * .1)
+      pvalue = adfuller(b)[1]
+      print 'b稳定:', pvalue < .01
+    #+END_SRC
+
+    #+RESULTS:
+    : a稳定: True
+    : b稳定: False
+** 序列的阶(Order of Integration)
+   - I(i)表示i阶序列
+   - 如果一个序列的相关性衰减很快, 即自相关性有限, 可以认为I(0)
+   - 实际情况测试, 是很难检测是否含有隐含的自相关性, 只检查序列的稳定性, 如果序列稳定, 我们就认为它是I(0)
+   - 当我们已知I(0), I(1) = I(0).cumsum(), I(2) = I(1).cumsum(), ...
+   - 相反的如果已知I(i), I(i-1) = I(i).diff()
+   - 股票的报价数据属于I(1), 收益率(multiplicative returns)数据属于I(0), 价差(additive returns)近似I(0).
+** 协整
+   - 如果时间序列: X1, X2, .... Xn, 都是I(1) (注意: X1是序列不是一个值)
+   - 而Y = b1 * X1 + b2 * X2, ... bn * Xn, Y是I(0), 则说明X1, X2, ..., Xn有协整关系
+   - 协整检验代码
+     #+BEGIN_SRC python :results output :exports both
+       # coding: utf-8
+       import numpy as np
+       from statsmodels.tsa.stattools import coint
+
+       # 构造0阶序列
+       X1_0 = np.random.normal(0, 1, 100)
+       X2_0 = np.random.normal(0, 1, 100)
+       # 构造1阶序列
+       X1 = X1_0.cumsum()
+       X2 = X2_0.cumsum()
+       # 协整检验
+       _, pvalue, _ = coint(X1, X2)
+       print u'协整:', pvalue < .05
+     #+END_SRC
+
+     #+RESULTS:
+     : 协整: False
+** 协整与相关性
+   - 相关不一定协整
+     #+BEGIN_SRC python :results output :exports both
+       # coding: utf-8
+       import numpy as np
+       import pandas as pd
+       from statsmodels.tsa.stattools import coint
+
+       X1_0 = np.random.normal(1, .1, 100)
+       X2_0 = np.random.normal(1, .1, 100)
+       X1 = pd.Series(X1_0.cumsum())
+       X2 = pd.Series(X2_0.cumsum())
+       print u'相关性:' , X1.corr(X2)
+       _, pvalue, _ = coint(X1, X2)
+       print u'协整:', pvalue < 0.05
+     #+END_SRC
+
+     #+RESULTS:
+     : 相关性: 0.999939788154
+     : 协整: False
+
+   - 协整不一定相关
+     #+BEGIN_SRC python :results output :exports both
+       # coding: utf-8
+       import numpy as np
+       import pandas as pd
+       from statsmodels.tsa.stattools import coint
+
+       x = np.linspace(-200, 200, 400)
+       X1 = pd.Series(np.sin(x))
+       X2 = pd.Series(np.cos(x))
+       print u'相关性:' , X1.corr(X2)
+       _, pvalue, _ = coint(X1, X2)
+       print u'协整:', pvalue < 0.05
+     #+END_SRC
+
+     #+RESULTS:
+     : 相关性: 6.13405117732e-17
+     : 协整: True
+
+* 配对交易
+  - 配对交易剔除了收益率对于市场情况的依赖
+** 多重比较偏差 
+  - 协整检测最好是在逻辑上疑似的股票上进行, 如果对于全量股票进行检测, 将导致多重比较谬误
+** 混淆变量(confounding variable)
+   - 两个股票可能看似协整, 但实际上它们不是真的协整, 它们只是和指数协整
+** EG两步法(Engle-Granger method)
+*** 协整检验
+*** 线性拟合
+** adfuller(Augmented-Dickey Fuller)
+   - 一种单位根检验(unit root test), 用于确认序列的稳定性
+** 赫斯特指数(Hurst exponent)
+   - 起初被用来分析水库与河流之间的进出流量，后来被广泛用于各行各业的分形分析。
+   - 利用Hurst参数可以表征网络流量的自相似性，Hurst参数越大，说明流量的自相似程度就越高，
+   - 也就是说网络的业务流量在很长的时间内都具有长相关性，这主要是由于网络流量的突发性造成的。
+** 卡尔曼滤波(Kalman filters)
+** Half-life of mean reversion inferred from an Ornstein–Uhlenbeck process
+   - 这个目前还不清楚是什么东东
